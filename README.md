@@ -27,17 +27,11 @@ Higher value → mouth open
 PERCLOS
 % of time eyes remain closed over a period
 Strong indicator of drowsiness
-🏗️ Project Structure
-📁 Driver-Drowsiness-Detection
-│── drowsiness_detector.py              # Basic version
-│── drowsiness_detector_mediapipe.py    # Advanced modular version
-│── requirements_mediapipe.txt          # Dependencies
-│── README.md
-⚙️ Installation
-1️⃣ Clone the repository
-git clone https://github.com/your-username/drowsiness-detection.git
+
+#⚙️ Installation
+
 cd drowsiness-detection
-2️⃣ Install dependencies
+ Install dependencies
 pip install -r requirements_mediapipe.txt
 ▶️ Usage
 Run the system:
@@ -58,16 +52,20 @@ Adjust these values based on lighting, camera quality, and user behavior.
 📸 Output Preview
 Real-time webcam feed
 Eye & mouth contours
+
 Status labels:
 🟢 AWAKE
 🟡 WARNING
 🟠 YAWNING
 🔴 DROWSY
+
 🔊 Alert System
+
 Plays a beep sound when:
 Drowsiness is detected
 Yawning exceeds threshold
 Falls back to visual alerts if audio is unavailable
+
 💡 Key Concepts Used
 Computer Vision
 Facial Landmark Detection
@@ -81,12 +79,14 @@ Human Attention Monitoring
 🌙 Night vision optimization
 ☁️ Cloud monitoring dashboard
 🛠️ Tech Stack
+
 Python
 OpenCV
 MediaPipe
 NumPy
 SciPy
 Pygame
+
 🤝 Contributing
 
 Contributions are welcome!
