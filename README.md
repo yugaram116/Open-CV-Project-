@@ -40,11 +40,11 @@ Mouth: [61, 291, 39, 181, 0, 17, 269, 405]
 Installation
 
 bash
-# Clone repository
+#Clone repository
 git clone https://github.com/yugaram116/Open-CV-Project-.git
 cd Open-CV-Project-
 
-# Install dependencies
+#Install dependencies
 pip install -r requirements_mediapipe.txt
 Requirements:
 
@@ -57,16 +57,16 @@ pygame>=2.5.0
 imutils>=0.5.4
 Usage
 bash
-# Basic usage (default camera)
+#Basic usage (default camera)
 python drowsiness_detector_mediapipe.py
 
-# Use external camera
+#Use external camera
 python drowsiness_detector_mediapipe.py -c 1
 
-# Save video recording
+#Save video recording
 python drowsiness_detector_mediapipe.py -s
 
-# Compact version
+#Compact version
 python drowsiness_detector.py
 Controls: Press Q or ESC to quit
 
