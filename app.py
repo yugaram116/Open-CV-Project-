@@ -2,45 +2,52 @@ import streamlit as st
 import cv2
 import numpy as np
 import av
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
+
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration, WebRtcMode
 
 import mediapipe as mp
 from scipy.spatial import distance as dist
 
-st.title("🚗 Driver Drowsiness Detection System")
+st.title("🚗 Driver Drowsiness Detection (ACTIVE vs SLEEPY)")
 
-# --------- CONFIG ----------
+# ---------------- CONFIG ----------------
 EAR_THRESHOLD = 0.22
 MAR_THRESHOLD = 0.65
 
-LEFT_EYE = [362,385,387,263,373,380]
-RIGHT_EYE = [33,160,158,133,153,144]
-MOUTH = [61,291,39,181,0,17,269,405]
+LEFT_EYE = [362, 385, 387, 263, 373, 380]
+RIGHT_EYE = [33, 160, 158, 133, 153, 144]
+MOUTH = [61, 291, 39, 181, 0, 17, 269, 405]
 
 mp_face_mesh = mp.solutions.face_mesh
 
-# --------- FUNCTIONS ----------
+
+# ---------------- FUNCTIONS ----------------
 def calc_ear(lm, idx, w, h):
-    p = [(int(lm[i].x*w), int(lm[i].y*h)) for i in idx]
+    p = [(int(lm[i].x * w), int(lm[i].y * h)) for i in idx]
     A = dist.euclidean(p[1], p[5])
     B = dist.euclidean(p[2], p[4])
     C = dist.euclidean(p[0], p[3])
-    return (A+B)/(2.0*C) if C else 0.0
+    return (A + B) / (2.0 * C) if C else 0.0
+
 
 def calc_mar(lm, idx, w, h):
-    p = [(int(lm[i].x*w), int(lm[i].y*h)) for i in idx]
+    p = [(int(lm[i].x * w), int(lm[i].y * h)) for i in idx]
     A = dist.euclidean(p[2], p[6])
     B = dist.euclidean(p[3], p[5])
     C = dist.euclidean(p[0], p[1])
-    return (A+B)/(2.0*C) if C else 0.0
+    return (A + B) / (2.0 * C) if C else 0.0
 
-# --------- VIDEO PROCESSOR ----------
+
+# ---------------- VIDEO PROCESSOR ----------------
 class DrowsinessProcessor(VideoProcessorBase):
     def __init__(self):
         self.face_mesh = mp_face_mesh.FaceMesh(
             max_num_faces=1,
             refine_landmarks=True
         )
+
+        self.eye_closed_frames = 0
+        self.yawn_frames = 0
 
     def recv(self, frame):
         img = frame.to_ndarray(format="bgr24")
@@ -50,39 +57,58 @@ class DrowsinessProcessor(VideoProcessorBase):
         results = self.face_mesh.process(rgb)
 
         status = "NO FACE"
+        color = (200, 200, 200)
 
         if results.multi_face_landmarks:
             lm = results.multi_face_landmarks[0].landmark
 
+            # ---- Compute EAR & MAR ----
             ear = (calc_ear(lm, LEFT_EYE, w, h) +
                    calc_ear(lm, RIGHT_EYE, w, h)) / 2.0
 
             mar = calc_mar(lm, MOUTH, w, h)
 
+            # ---- Eye detection ----
             if ear < EAR_THRESHOLD:
-                status = "DROWSY 😴"
-                color = (0, 0, 255)
-            elif mar > MAR_THRESHOLD:
-                status = "YAWNING 🥱"
-                color = (0, 165, 255)
+                self.eye_closed_frames += 1
             else:
-                status = "AWAKE 🙂"
+                self.eye_closed_frames = 0
+
+            # ---- Yawn detection ----
+            if mar > MAR_THRESHOLD:
+                self.yawn_frames += 1
+            else:
+                self.yawn_frames = 0
+
+            # ---- FINAL STATE ----
+            if self.eye_closed_frames > 15 or self.yawn_frames > 10:
+                status = "SLEEPY 😴"
+                color = (0, 0, 255)
+            else:
+                status = "ACTIVE 😃"
                 color = (0, 255, 0)
 
-            cv2.putText(img, status, (20, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        color, 3)
+            # ---- Display metrics ----
+            cv2.putText(img, f"EAR: {ear:.2f}", (20, 90),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2)
+
+            cv2.putText(img, f"MAR: {mar:.2f}", (20, 120),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2)
+
+        # ---- Display status ----
+        cv2.putText(img, status, (20, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+                    color, 3)
 
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 
-# --------- STREAM ----------
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration, WebRtcMode
-
+# ---------------- WEBRTC CONFIG (IMPORTANT) ----------------
 RTC_CONFIGURATION = RTCConfiguration(
     {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
 )
 
+# ---------------- START STREAM ----------------
 webrtc_streamer(
     key="drowsiness",
     mode=WebRtcMode.SENDRECV,
