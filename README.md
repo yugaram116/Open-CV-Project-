@@ -1,171 +1,252 @@
-# Driver Drowsiness Detection System Project(Open-CV)
+# 🚗 Driver Drowsiness Detection System
 
+A **real-time AI-powered driver monitoring system** that detects fatigue using **computer vision techniques**. The system analyzes facial landmarks to identify **eye closure, yawning, and drowsiness levels**, and triggers **audio-visual alerts** to improve road safety.
 
-Driver Drowsiness Detection System
-Real-time driver fatigue monitoring using MediaPipe Face Mesh and OpenCV. Detects eye closure (EAR), yawning (MAR), and calculates PERCLOS to issue audio-visual alerts.
+---
 
-Features
-Eye closure detection using Eye Aspect Ratio (EAR)
+## 🧠 Overview
 
-Yawning detection using Mouth Aspect Ratio (MAR)
+This project uses:
 
-Fatigue measurement using PERCLOS (rolling window)
+* **OpenCV** for real-time video processing
+* **MediaPipe** Face Mesh for facial landmark detection
+* **Streamlit** for browser-based webcam app
+* **NumPy** for calculations
 
-Real-time audio alerts (880 Hz beep)
+It detects drowsiness using three key metrics:
 
-Live on-screen metrics with color-coded status
+* **EAR (Eye Aspect Ratio)** → detects eye closure
+* **MAR (Mouth Aspect Ratio)** → detects yawning
+* **PERCLOS** → percentage of eye closure over time
 
-Optional video recording
+---
 
-Session summary with alert statistics
+## 🚀 Features
 
-No dlib required - lightweight MediaPipe
+* 👁️ **Eye Closure Detection (EAR)**
+* 😮 **Yawning Detection (MAR)**
+* 📊 **PERCLOS Fatigue Measurement**
+* 🔊 **Audio Alerts (Beep Sound)**
+* 🎥 **Real-time Webcam Monitoring**
+* 🧾 **Session Summary (alerts, duration, yawns)**
+* 🌐 **Streamlit Web App (Face Detection Demo)**
+* ⚡ **Lightweight – No dlib required**
 
-How It Works
+---
 
-The system detects 468 facial landmarks using MediaPipe, then calculates:
+## 🖥️ Applications Included
 
-Metric	Formula	Purpose
-EAR	(vertical distances) / (2 × horizontal distance)	Lower value = eyes closed
-MAR	(vertical distances) / (2 × horizontal distance)	Higher value = mouth open
-PERCLOS	(closed frames) / (window size)	Percentage of eye closure over time
-Landmark indices used:
+### 1️⃣ Drowsiness Detection (Main System)
 
-Left eye: [362, 385, 387, 263, 373, 380]
-
-Right eye: [33, 160, 158, 133, 153, 144]
-
-Mouth: [61, 291, 39, 181, 0, 17, 269, 405]
-
-Installation
-
-bash
-#Clone repository
-git clone https://github.com/yugaram116/Open-CV-Project-.git
-cd Open-CV-Project-
-
-#Install dependencies
-pip install -r requirements_mediapipe.txt
-Requirements:
-
-text
-mediapipe>=0.10.0
-opencv-python>=4.8.0
-numpy>=1.24.0
-scipy>=1.11.0
-pygame>=2.5.0
-imutils>=0.5.4
-Usage
-bash
-#Basic usage (default camera)
+```bash
 python drowsiness_detector_mediapipe.py
+```
 
-#Use external camera
-python drowsiness_detector_mediapipe.py -c 1
+* Uses MediaPipe Face Mesh (468 landmarks)
+* Full-featured detection system
+* Audio + visual alerts
+* Optional video recording
 
-#Save video recording
-python drowsiness_detector_mediapipe.py -s
+---
 
-#Compact version
+### 2️⃣ Compact Version
+
+```bash
 python drowsiness_detector.py
-Controls: Press Q or ESC to quit
+```
 
-Configuration
-Adjust thresholds in the source code:
+* Simplified and faster version
+* Core detection logic only
 
-python
-EAR_THRESHOLD      = 0.22   # Eye closure threshold
-MAR_THRESHOLD      = 0.65   # Yawning threshold
-EAR_CONSEC_FRAMES  = 20     # Frames below EAR before alert
-MAR_CONSEC_FRAMES  = 15     # Frames above MAR before yawn alert
-PERCLOS_THRESHOLD  = 0.30   # PERCLOS percentage threshold
-Tuning guide:
+---
 
-Bright lighting → Increase EAR_THRESHOLD by 0.02-0.03
+### 3️⃣ Streamlit Face Detection App
 
-Poor lighting → Decrease EAR_THRESHOLD by 0.01-0.02
+```bash
+streamlit run app.py
+```
 
-Small eyes → Decrease EAR_THRESHOLD by 0.02-0.03
+* Real-time webcam in browser
+* Face detection using Haar Cascades
 
-Output
-Real-time Display
-Element	Location	Description
-EAR, MAR, PERCLOS	Top-left	Current metric values
-Status	Top-right	AWAKE / WARNING / DROWSY / YAWNING
-EAR progress bar	Top-right	Visual indicator
-Session timer	Bottom-left	Duration and alert counts
-Eye contours	Green/Red	Red when eyes closed
-Mouth contour	Orange	Visible during yawning
-Status Colors
-AWAKE - Green
+---
 
-WARNING - Yellow
+## 📊 Detection Metrics
 
-DROWSY - Red
+| Metric  | Formula                                          | Purpose               |
+| ------- | ------------------------------------------------ | --------------------- |
+| EAR     | (vertical distances) / (2 × horizontal distance) | Eye closure detection |
+| MAR     | (vertical distances) / (2 × horizontal distance) | Yawning detection     |
+| PERCLOS | closed frames / total frames                     | Fatigue level         |
 
-YAWNING - Orange
+---
 
-Session Summary (on quit)
-text
-=============================================
-  SESSION SUMMARY
-=============================================
-  Duration          : 02:35
-  Frames processed  : 3100
-  Drowsiness alerts : 3
-  Yawn events       : 5
-=============================================
-Alert System
-Alert Type	Trigger	Visual	Audio
-Drowsy	20+ frames closed OR PERCLOS > 30%	Red banner	880 Hz beep
-Yawning	15+ frames mouth open	Orange banner	880 Hz beep
-Warning	10+ frames closed	Yellow status	None
-Cooldown: 3 seconds between audio alerts
+## ⚙️ Installation
 
-Project Structure
-text
-Open-CV-Project-/
-├── drowsiness_detector_mediapipe.py   # Main application
-├── drowsiness_detector.py             # Compact version
-├── requirements_mediapipe.txt         # Dependencies
-├── README.md                          # Documentation
-├── screenshots/                       # Images for README
-└── output.avi                         # Recording (if -s used)
-Troubleshooting
-Issue	Solution
-Camera not opening	Try -c 1 or -c 2
-Poor detection	Improve lighting, sit 1-2 feet from camera
-False alerts	Adjust EAR/MAR thresholds
-No audio	Run pip install pygame
-Low FPS	Reduce resolution in code
-Future Improvements
-Mobile app integration for fleet monitoring
+### 1. Clone Repository
 
-Vehicle system integration (CAN bus)
+```bash
+git clone https://github.com/your-username/driver-drowsiness-detection.git
+cd driver-drowsiness-detection
+```
 
-Deep learning-based fatigue detection
+---
 
-Night vision with infrared camera
+### 2. Create Virtual Environment
 
-Cloud dashboard for real-time monitoring
+```bash
+python -m venv venv
+source venv/bin/activate   # Windows: venv\\Scripts\\activate
+```
 
-Contributing
-Fork the repository
+---
 
-Create a feature branch (git checkout -b feature/improvement)
+### 3. Install Dependencies
 
-Commit changes (git commit -m 'Add feature')
+```bash
+pip install -r requirements.txt
+```
 
-Push to branch (git push origin feature/improvement)
+Or for full MediaPipe version:
 
-Open a Pull Request
+```bash
+pip install mediapipe opencv-python numpy scipy pygame imutils
+```
 
-License
-MIT License - see repository for details.
+---
 
-Author
-Yugaram TS
-GitHub: @yugaram116
+## 🔑 Requirements
 
-Disclaimer
-This project is for educational purposes only. It should NOT be used as a sole safety system in real-world driving conditions. Always drive responsibly and take breaks when tired. The authors are not responsible for any accidents or damages resulting from use of this software.
+### Python Dependencies
+
+* streamlit
+* streamlit-webrtc
+* opencv-python-headless
+* numpy
+* protobuf
+
+### System Packages (Linux)
+
+* libgl1
+* libsm6
+* libxext6
+* libxrender1
+
+---
+
+## ▶️ Usage Options
+
+### Default Camera
+
+```bash
+python drowsiness_detector_mediapipe.py
+```
+
+### External Camera
+
+```bash
+python drowsiness_detector_mediapipe.py -c 1
+```
+
+### Save Video Output
+
+```bash
+python drowsiness_detector_mediapipe.py -s
+```
+
+---
+
+## 🎮 Controls
+
+* Press **Q** or **ESC** → Quit application
+
+---
+
+## ⚙️ Configuration
+
+Modify thresholds in code:
+
+```python
+EAR_THRESHOLD = 0.22
+MAR_THRESHOLD = 0.65
+PERCLOS_THRESHOLD = 0.30
+```
+
+### Tuning Tips
+
+* Bright light → increase EAR
+* Low light → decrease EAR
+* False alerts → adjust MAR/PERCLOS
+
+---
+
+## 📈 Output
+
+### Real-Time Display
+
+* EAR, MAR, PERCLOS values
+* Status: **AWAKE / WARNING / DROWSY / YAWNING**
+* Colored overlays & contours
+* Session timer
+
+### Alert System
+
+| Alert   | Trigger                    | Action            |
+| ------- | -------------------------- | ----------------- |
+| Drowsy  | Eyes closed / high PERCLOS | 🔴 Visual + Sound |
+| Yawning | Mouth open long            | 🟠 Visual + Sound |
+| Warning | Partial closure            | 🟡 Visual only    |
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── app.py
+├── drowsiness_detector.py
+├── drowsiness_detector_mediapipe.py
+├── requirements.txt
+├── runtime.txt
+├── packages.txt
+└── README.md
+```
+
+---
+
+## 🔮 Future Improvements
+
+* 📱 Mobile app integration
+* 🚗 Vehicle system integration
+* 🤖 Deep learning-based detection
+* 🌙 Night vision support
+* ☁️ Cloud dashboard
+
+---
+
+## 🤝 Contributing
+
+```bash
+fork → branch → commit → push → pull request
+```
+
+---
+
+## 📜 License
+
+MIT License
+
+---
+
+## ⚠️ Disclaimer
+
+This project is for **educational purposes only**. It should NOT be used as a **real-world safety system** without proper validation.
+
+---
+
+## 👨‍💻 Author
+
+**Yugaram TS**
+GitHub: [https://github.com/yugaram116](https://github.com/yugaram116)
+
+---
